@@ -64,14 +64,6 @@ FusionEKF::FusionEKF() {
   noise_ax = 9;
   noise_ay = 9;
 
-  /**
-  TODO:
-    * Finish initializing the FusionEKF.
-    * Set the process and measurement noises
-  DONE.
-  */
-
-
 }
 
 /**
@@ -87,12 +79,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    ****************************************************************************/
   if (!is_initialized_) {
     /**
-    TODO:
       * Initialize the state ekf_.x_ with the first measurement.
       * Create the covariance matrix.
       * Remember: you'll need to convert radar from polar to cartesian coordinates.
-    DONE.
     */
+
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
@@ -100,35 +91,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
-      Convert radar from polar to cartesian coordinates and initialize state.
+      Initialize state.
       */
-      float ro;
-      float phi;
-      float ro_dot;
-      float px;
-      float py;
-      float px_dot;
-      float py_dot;
-      ro = measurement_pack.raw_measurements_[0];
-      phi = measurement_pack.raw_measurements_[1];
-      ro_dot = measurement_pack.raw_measurements_[2];
-      // calculating position and velocity
-      px = ro * cos(phi);
-      py = ro * sin(phi);
-      if ((py == 0) || ((px*px / py + py) == 0)) {
-        py_dot = 0;
-      }
-      else {
-        py_dot = ro * ro_dot / (px*px / py + py);
-      }
-      if (py == 0) {
-        px_dot = 0;
-      }
-      else {
-        px_dot = px*py_dot / py;
-      }
-      // 
-      ekf_.x_ << px, py, px_dot, py_dot;
+      // Convert to cartesian coordinates and assign the position
+      Eigen::VectorXd radar_x_ = tools.CalculateCartesianFromPolar(measurement_pack.raw_measurements_);
+      ekf_.x_ << radar_x_;
       //
       previous_timestamp_ = measurement_pack.timestamp_;
     }
@@ -137,7 +104,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       Initialize state.
       */
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
-
+      //
       previous_timestamp_ = measurement_pack.timestamp_;
     }
 
@@ -152,17 +119,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     return;
   }
 
-  /*****************************************************************************
+  /****************************************************************************************************
    *  Prediction
-   ****************************************************************************/
+   *  Update the state transition matrix F according to the new elapsed time - convert time to seconds.
+   *  Update the process noise covariance matrix.
+   ****************************************************************************************************/
 
-  /**
-   TODO:
-     * Update the state transition matrix F according to the new elapsed time.
-      - Time is measured in seconds.
-     * Update the process noise covariance matrix.
-     * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
-   */
 
   //compute the time elapsed between the current and previous measurements
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
@@ -190,53 +152,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   //call predict function - same for both laser and radar
   ekf_.Predict();
 
-  /*****************************************************************************
-   *  Update
-   ****************************************************************************/
-
-  /**
-   TODO:
-     * Use the sensor type to perform the update step.
-     * Update the state and covariance matrices.
-   Done.
-   */
+  /********************************************************************************************************
+   *  Update - Use the sensor type to perform the update step - Update the state and covariance matrices.
+   ********************************************************************************************************/
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
-    // Set measurement matrix Hj and measurmeent covariance matrix R
     
-    /**
-    Convert radar from polar to cartesian coordinates and initialize state.
-    */
-    float ro;
-    float phi;
-    float ro_dot;
-    float px;
-    float py;
-    float px_dot;
-    float py_dot;
-    ro = measurement_pack.raw_measurements_[0];
-    phi = measurement_pack.raw_measurements_[1];
-    ro_dot = measurement_pack.raw_measurements_[2];
-    // calculating position and velocity
-    px = ro * cos(phi);
-    py = ro * sin(phi);
-    if ((py == 0) || ((px*px / py + py)==0)) {
-      py_dot = 0;
-    } else {
-      py_dot = ro * ro_dot / (px*px / py + py);
-    }
-    if (py == 0) {
-      px_dot = 0;
-    } else {
-      px_dot = px*py_dot / py;
-    }
-    //
-    Eigen::VectorXd radar_x_(4);
-    radar_x_ << px, py, px_dot, py_dot;
-    //
+    // Convert to cartesian coordinate and calculate Jacobian matrix Hj
+    Eigen::VectorXd radar_x_ = tools.CalculateCartesianFromPolar(measurement_pack.raw_measurements_);
     Hj_ = tools.CalculateJacobian(radar_x_);
-
+    // Assign matrices R and Hj
     ekf_.R_ = R_radar_;
     ekf_.H_ = Hj_;
     // use Extended Kalman Filter update

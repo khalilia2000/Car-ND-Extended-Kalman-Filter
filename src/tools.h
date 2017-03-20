@@ -26,9 +26,14 @@ public:
   Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
 
   /**
-  * A helper method to calculate h(x), which returns the polar coordinates (i.e. ro, phi and ro_dot) from cartesian coordinates
+  * A helper method to calculate h(x), which returns the polar coordinates (i.e. ro, phi and ro_dot) from cartesian coordinates (i.e. px, py, px_dot and py_dot)
   */
-  Eigen::VectorXd CalculatePolar(const Eigen::VectorXd& x_state);
+  Eigen::VectorXd CalculatePolarFromCartesian(const Eigen::VectorXd& x_state);
+
+  /**
+  * A helper method to calculate c(x), which returns the cartesian coordinates (i.e. px, py, px_dot and py_dot) from polar coordinates (i.e. ro, phi and ro_dot)
+  */
+  Eigen::VectorXd CalculateCartesianFromPolar(const Eigen::VectorXd& x_state);
 
 };
 

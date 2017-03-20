@@ -20,9 +20,7 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
 
 void KalmanFilter::Predict() {
   /**
-  TODO:
     * predict the state
-  DONE.
   */
   x_ = F_ * x_;
   MatrixXd Ft = F_.transpose();
@@ -31,9 +29,7 @@ void KalmanFilter::Predict() {
 
 void KalmanFilter::Update(const VectorXd &z) {
   /**
-  TODO:
     * update the state by using Kalman Filter equations
-  DONE.
   */
   VectorXd z_pred = H_ * x_;
   VectorXd y = z - z_pred;
@@ -52,12 +48,13 @@ void KalmanFilter::Update(const VectorXd &z) {
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
   /**
-  TODO:
     * update the state by using Extended Kalman Filter equations
-  DONE.
+    * ro, phi and ro_dot should be initially extracted from z
+    * H_ is the propoer Jacobian matrix
   */
   Tools tools;
-  VectorXd z_pred = tools.CalculatePolar(x_);
+  // Convert polar coordinates to cartesian coordinates
+  VectorXd z_pred = tools.CalculatePolarFromCartesian(x_);
   VectorXd y = z - z_pred;
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;

@@ -14,6 +14,9 @@ using Eigen::VectorXd;
 using std::vector;
 
 void check_arguments(int argc, char* argv[]) {
+  /**
+  * A helper function to check the command line arguments and return error if not correct.
+  */
   string usage_instructions = "Usage instructions: ";
   usage_instructions += argv[0];
   usage_instructions += " path/to/input.txt output.txt";
@@ -38,6 +41,9 @@ void check_arguments(int argc, char* argv[]) {
 
 void check_files(ifstream& in_file, string& in_name,
                  ofstream& out_file, string& out_name) {
+  /**
+  * A helper function to check the files and return error if cannot open
+  */
   if (!in_file.is_open()) {
     cerr << "Cannot open input file: " << in_name << endl;
     exit(EXIT_FAILURE);
@@ -50,6 +56,8 @@ void check_files(ifstream& in_file, string& in_name,
 }
 
 int main(int argc, char* argv[]) {
+
+  // check command line arguments and openfiles
 
   check_arguments(argc, argv);
 
@@ -66,9 +74,7 @@ int main(int argc, char* argv[]) {
 
   string line;
 
-  // prep the measurement packages (each line represents a measurement at a
-  // timestamp)
-
+  // prep the measurement packages (each line represents a measurement at a timestamp)
 
   while (getline(in_file_, line)) {
 
@@ -83,7 +89,6 @@ int main(int argc, char* argv[]) {
 
     if (sensor_type.compare("L") == 0) {
       // LASER MEASUREMENT
-
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::LASER;
       meas_package.raw_measurements_ = VectorXd(2);
@@ -97,7 +102,6 @@ int main(int argc, char* argv[]) {
       measurement_pack_list.push_back(meas_package);
     } else if (sensor_type.compare("R") == 0) {
       // RADAR MEASUREMENT
-
       // read measurements at this timestamp
       meas_package.sensor_type_ = MeasurementPackage::RADAR;
       meas_package.raw_measurements_ = VectorXd(3);
@@ -165,7 +169,7 @@ int main(int argc, char* argv[]) {
     out_file_ << gt_pack_list[k].gt_values_(1) << "\t";
     out_file_ << gt_pack_list[k].gt_values_(2) << "\t";
     out_file_ << gt_pack_list[k].gt_values_(3) << "\n";
-
+    //
     estimations.push_back(fusionEKF.ekf_.x_);
     ground_truth.push_back(gt_pack_list[k].gt_values_);
   }
@@ -178,7 +182,6 @@ int main(int argc, char* argv[]) {
   if (out_file_.is_open()) {
     out_file_.close();
   }
-
   if (in_file_.is_open()) {
     in_file_.close();
   }

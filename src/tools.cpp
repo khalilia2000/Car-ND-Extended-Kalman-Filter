@@ -89,7 +89,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
 }
 
 
-VectorXd Tools::CalculatePolar(const Eigen::VectorXd& x_state) {
+VectorXd Tools::CalculatePolarFromCartesian(const Eigen::VectorXd& x_state) {
   /**
   * Calculate h(x), which provides polar positions ro, phi and ro_dot from cartesian position and velocity values
   */
@@ -119,4 +119,41 @@ VectorXd Tools::CalculatePolar(const Eigen::VectorXd& x_state) {
 
   return h_x;
 
+}
+
+
+VectorXd Tools::CalculateCartesianFromPolar(const Eigen::VectorXd& x_state) {
+  /**
+  * A helper method to calculate c(x), which returns the cartesian coordinates (i.e. px, py, px_dot and py_dot) from polar coordinates (i.e. ro, phi and ro_dot)
+  */
+  float ro;
+  float phi;
+  float ro_dot;
+  float px;
+  float py;
+  float px_dot;
+  float py_dot;
+  ro = x_state(0);
+  phi = x_state(1);
+  ro_dot = x_state(2);
+  // calculating position and velocity
+  px = ro * cos(phi);
+  py = ro * sin(phi);
+  if ((py == 0) || ((px*px / py + py) == 0)) {
+    py_dot = 0;
+  }
+  else {
+    py_dot = ro * ro_dot / (px*px / py + py);
+  }
+  if (py == 0) {
+    px_dot = 0;
+  }
+  else {
+    px_dot = px*py_dot / py;
+  }
+  //
+  Eigen::VectorXd cartesian_(4);
+  cartesian_ << px, py, px_dot, py_dot;
+
+  return cartesian_;
 }
