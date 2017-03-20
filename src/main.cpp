@@ -69,16 +69,18 @@ int main(int argc, char* argv[]) {
   // prep the measurement packages (each line represents a measurement at a
   // timestamp)
 
+  istringstream iss;
+
   while (getline(in_file_, line)) {
 
     string sensor_type;
     MeasurementPackage meas_package;
     GroundTruthPackage gt_package;
-    istringstream iss(line);
-    long timestamp;
-
+    iss.str(line);
+    double timestamp;
     // reads first element from the current line
     iss >> sensor_type;
+
     if (sensor_type.compare("L") == 0) {
       // LASER MEASUREMENT
 
@@ -91,7 +93,7 @@ int main(int argc, char* argv[]) {
       iss >> y;
       meas_package.raw_measurements_ << x, y;
       iss >> timestamp;
-      meas_package.timestamp_ = timestamp;
+      meas_package.timestamp_ = static_cast<long>(timestamp);
       measurement_pack_list.push_back(meas_package);
     } else if (sensor_type.compare("R") == 0) {
       // RADAR MEASUREMENT
@@ -107,7 +109,7 @@ int main(int argc, char* argv[]) {
       iss >> ro_dot;
       meas_package.raw_measurements_ << ro, phi, ro_dot;
       iss >> timestamp;
-      meas_package.timestamp_ = timestamp;
+      meas_package.timestamp_ = static_cast<long>(timestamp);
       measurement_pack_list.push_back(meas_package);
     }
 
