@@ -115,8 +115,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       // calculating position and velocity
       px = ro * cos(phi);
       py = ro * sin(phi);
-      py_dot = ro * ro_dot / (px*px / py + py);
-      px_dot = px*py_dot / py;
+      if ((py == 0) || ((px*px / py + py) == 0)) {
+        py_dot = 0;
+      }
+      else {
+        py_dot = ro * ro_dot / (px*px / py + py);
+      }
+      if (py == 0) {
+        px_dot = 0;
+      }
+      else {
+        px_dot = px*py_dot / py;
+      }
       // 
       ekf_.x_ << px, py, px_dot, py_dot;
       //
@@ -194,8 +204,40 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
     // Set measurement matrix Hj and measurmeent covariance matrix R
+    
+    /**
+    Convert radar from polar to cartesian coordinates and initialize state.
+    */
+    float ro;
+    float phi;
+    float ro_dot;
+    float px;
+    float py;
+    float px_dot;
+    float py_dot;
+    ro = measurement_pack.raw_measurements_[0];
+    phi = measurement_pack.raw_measurements_[1];
+    ro_dot = measurement_pack.raw_measurements_[2];
+    // calculating position and velocity
+    px = ro * cos(phi);
+    py = ro * sin(phi);
+    if ((py == 0) || ((px*px / py + py)==0)) {
+      py_dot = 0;
+    } else {
+      py_dot = ro * ro_dot / (px*px / py + py);
+    }
+    if (py == 0) {
+      px_dot = 0;
+    } else {
+      px_dot = px*py_dot / py;
+    }
+    //
+    Eigen::VectorXd radar_x_(4);
+    radar_x_ << px, py, px_dot, py_dot;
+    //
+    Hj_ = tools.CalculateJacobian(radar_x_);
+
     ekf_.R_ = R_radar_;
-    Hj_ = tools.CalculateJacobian(measurement_pack.raw_measurements_);
     ekf_.H_ = Hj_;
     // use Extended Kalman Filter update
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
@@ -209,6 +251,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   }
 
   // print the output
-  cout << "x_ = " << ekf_.x_ << endl;
-  cout << "P_ = " << ekf_.P_ << endl;
+  //cout << "x_ = " << ekf_.x_ << endl;
+  //cout << "P_ = " << ekf_.P_ << endl;
 }
