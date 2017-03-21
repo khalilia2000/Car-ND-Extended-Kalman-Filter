@@ -56,6 +56,14 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   // Convert polar coordinates to cartesian coordinates
   VectorXd z_pred = tools.CalculatePolarFromCartesian(x_);
   VectorXd y = z - z_pred;
+  // adjust phi so that it remains between pi and -pi
+  while (y(1) < -M_PI) { 
+    y(1) += 2*M_PI; 
+  }
+  while (y(1) > M_PI) { 
+    y(1) -= 2*M_PI; 
+  }
+  //
   MatrixXd Ht = H_.transpose();
   MatrixXd S = H_ * P_ * Ht + R_;
   MatrixXd Si = S.inverse();

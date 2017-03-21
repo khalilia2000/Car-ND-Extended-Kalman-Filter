@@ -87,8 +87,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 1, 1, 1, 1;
 
+    double velocity_uncertainty_;
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
       Initialize state.
@@ -98,6 +98,8 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_ << radar_x_;
       //
       previous_timestamp_ = measurement_pack.timestamp_;
+      //
+      velocity_uncertainty_ = 2;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
       /**
@@ -106,13 +108,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_ << measurement_pack.raw_measurements_[0], measurement_pack.raw_measurements_[1], 0, 0;
       //
       previous_timestamp_ = measurement_pack.timestamp_;
+      //
+      velocity_uncertainty_ = 50;
     }
 
     //re-set state covariance matrix P
     ekf_.P_(0, 0) = 1;
     ekf_.P_(1, 1) = 1;
-    ekf_.P_(2, 2) = 1000;
-    ekf_.P_(3, 3) = 1000;
+    ekf_.P_(2, 2) = velocity_uncertainty_;
+    ekf_.P_(3, 3) = velocity_uncertainty_;
 
     // done initializing, no need to predict or update
     is_initialized_ = true;
