@@ -29,3 +29,15 @@ Self-Driving Car Engineer Nanodegree Program
 
 It has been tried to stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
 
+## Results for dataset #1
+
+The following image presents the results obtained on the first data file. The ground truth values of Px and Py along with the predicted values (i.e. using EKF) and the measurement values are shown on the image below. RMSE values of **0.0661335**, **0.0603752**, **0.530256** and **0.54439** were obtained for Px, Py, Px_dot, and Py_dot.
+
+<img src="./results/results1.PNG" alt="Visualization of the resutls for dataset #1">
+
+
+## Results for dataset #2
+
+The following image presents the results obtained on the second data file. The ground truth values of Px and Py along with the predicted values (i.e. using EKF) and the measurement values are shown on the image below. RMSE values of **0.185943**, **0.190263**, **0.477037** and **0.805526** were obtained for Px, Py, Px_dot, and Py_dot.
+
+<img src="./results/results2.PNG" alt="Visualization of the resutls for dataset #2">
